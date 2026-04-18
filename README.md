@@ -6,6 +6,24 @@ by Yan Wang, Yitao Xu, Nanhan Shen, Jinyan Su, Jimin Huang, and Zining Zhu (2026
 
 > Mixture-of-Experts (MoE) models are widely assumed to achieve domain specialization through sparse routing. We challenge this assumption by introducing **COMMITTEEAUDIT**, a post-hoc framework that analyzes routing behavior at the level of **expert groups** rather than individual experts. Across three representative MoE models (OLMoE, Qwen3-30B-A3B, DeepSeek-V2-Lite) and the MMLU benchmark, we uncover a domain-invariant **Standing Committee**: a compact coalition of routed experts that consistently captures the majority of routing mass across domains, layers, and routing budgets, even when the architecture already includes shared experts.
 
+## Paper at a Glance (ACL 2026 Main)
+
+This repository reproduces and extends the core finding of the paper: MoE routing does **not** primarily form domain-isolated specialists. Instead, models repeatedly rely on a small, stable, cross-domain expert coalition ("Standing Committee").
+
+The paper addresses three questions:
+
+1. **Existence** - Do stable cross-domain expert groups emerge?
+2. **Dynamics** - How does this structure evolve with depth and model scale?
+3. **Functionality** - What roles do committee experts play compared with peripheral experts?
+
+Key empirical takeaways from the paper:
+
+- **Compact committee size:** across full-layer audits, committees are usually very small (`|C|` typically 1-4; up to 5 in Qwen3-30B-A3B).
+- **High routing concentration:** committee coverage often exceeds `50%`, and reaches around `70%` in deeper layers for DeepSeek-V2-Lite.
+- **Strong influence density:** committee members can contribute `13x-45x` more (on average) than non-members under matched settings.
+- **Functional criticality:** masking committee experts sharply degrades MMLU performance (correct rate from `0.39` baseline to as low as `0.03` in deep layers).
+- **Cross-dataset robustness:** the pattern persists from MMLU to a C4-based free-form web-text setting, supporting a general routing tendency rather than benchmark-specific behavior.
+
 ## Key Findings
 
 - **Existence.** A small, stable set of 2–5 experts per layer absorbs up to 70% of the total routing mass across diverse domains. This committee persists even in architectures with explicit *shared experts*, suggesting centralization is an emergent property of sparse routing rather than an architectural artifact.
@@ -29,7 +47,7 @@ COMMITTEEAUDIT is a model-agnostic, three-stage auditing pipeline:
 CommitteeAudit/
 ├── router_lens.py                     # (1) Extract per-sample router outputs via forward hooks
 ├── MOE_adjustment_example.py          # Template: how to modify a model's MoE gate for data collection
-├── get_frequnecy_data.py              # (2a) Aggregate expert activation frequency per (domain, layer)
+├── get_frequency_data.py              # (2a) Aggregate expert activation frequency per (domain, layer)
 ├── get_frequency_and_weight_data.py   # (2b) Aggregate frequency × normalized routing weight per (domain, layer)
 ├── Audit_Committee.py                 # (3) Run Standing Committee audit on the aggregated top-k table
 └── README.md
@@ -41,7 +59,7 @@ The full reproduction pipeline has four steps:
 
 1. **Modify the MoE gate** of your target model so its `forward` exposes `topk_idx` / `topk_weight` — see `MOE_adjustment_example.py`.
 2. **Collect router outputs** per prompt with `router_lens.py` → saves `RW/*.pth`.
-3. **Aggregate** routing info per `(domain, layer)` with `get_frequency_and_weight_data.py` (or `get_frequnecy_data.py` for frequency only) → produces a top-k Excel table.
+3. **Aggregate** routing info per `(domain, layer)` with `get_frequency_and_weight_data.py` (or `get_frequency_data.py` for frequency only) → produces a top-k Excel table.
 4. **Run the Standing Committee audit** on the aggregated table with `Audit_Committee.py` → produces the final CSV.
 
 > **Note.** `MOE_adjustment_example.py` targets **DeepSeek-V2-Lite**; porting to other models (e.g., OLMoE, Qwen3-MoE) requires adapting the modification to that model's gating implementation. The modified gate is intended for **offline data collection only** — do not use it for downstream inference or training.
@@ -86,7 +104,7 @@ The standalone audit script (`Audit_Committee.py`) accepts a top-k routing table
 ```bash
 python get_frequency_and_weight_data.py   # frequency × normalized weight
 # or
-python get_frequnecy_data.py              # activation frequency only
+python get_frequency_data.py              # activation frequency only
 ```
 
 Both scripts output an Excel file with columns `idx, domain, topk_indices, topk_values`, which is exactly the input format expected by `Audit_Committee.py`.
@@ -247,6 +265,16 @@ Layer,Committee,Size,Avg_mu,Avg_sigma_sq,Coverage,Ratio
 | Parse error on list cells | Invalid list syntax in `topk_indices` or `topk_values`. |
 | `presence_ratio must be in the range (0, 1].` | `--presence-ratio` outside the valid range. |
 | Empty output | Input became empty after preprocessing (e.g., all rows filtered out). |
+
+## File Naming Notes
+
+To keep names consistent and typo-free, this repo uses:
+
+- `get_frequency_data.py` (corrected from historical typo `get_frequnecy_data.py`)
+- `get_frequency_and_weight_data.py`
+- `Audit_Committee.py`
+- `router_lens.py`
+- `MOE_adjustment_example.py`
 
 ## Citation
 
