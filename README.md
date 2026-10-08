@@ -1,12 +1,44 @@
-# CommitteeAudit
+<div align="center">
+
+<h1>CommitteeAudit</h1>
+
+<p><b>The Illusion of Specialization: Unveiling the Domain-Invariant "Standing Committee" in Mixture-of-Experts Models</b></p>
+
+<p>
+  <a href="https://arxiv.org/abs/2601.03425"><img src="https://img.shields.io/badge/arXiv-2601.03425-b31b1b.svg" alt="arXiv"></a>
+  <a href="https://arxiv.org/abs/2601.03425"><img src="https://img.shields.io/badge/ACL-2026%20Main-blue.svg" alt="ACL 2026 Main"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
+</p>
+
+<p>
+  <a href="https://arxiv.org/abs/2601.03425">Paper</a>
+</p>
+
+</div>
+
+## Overview
 
 Official implementation of the paper
 **[The Illusion of Specialization: Unveiling the Domain-Invariant "Standing Committee" in Mixture-of-Experts Models](https://arxiv.org/abs/2601.03425)**
-by Yan Wang, Yitao Xu, Nanhan Shen, Jinyan Su, Jimin Huang, and Zining Zhu (2026).
+by Yan Wang, Yitao Xu, Nanhan Shen, Jinyan Su, Jimin Huang, and Zining Zhu (ACL 2026 Main).
 
 > Mixture-of-Experts (MoE) models are widely assumed to achieve domain specialization through sparse routing. We challenge this assumption by introducing **COMMITTEEAUDIT**, a post-hoc framework that analyzes routing behavior at the level of **expert groups** rather than individual experts. Across three representative MoE models (OLMoE, Qwen3-30B-A3B, DeepSeek-V2-Lite) and the MMLU benchmark, we uncover a domain-invariant **Standing Committee**: a compact coalition of routed experts that consistently captures the majority of routing mass across domains, layers, and routing budgets, even when the architecture already includes shared experts.
 
-## Paper at a Glance (ACL 2026 Main)
+## Contents
+
+- [Paper at a Glance](#paper-at-a-glance)
+- [Key Findings](#key-findings)
+- [Framework Overview](#framework-overview)
+- [Repository Structure](#repository-structure)
+- [End-to-End Pipeline](#end-to-end-pipeline)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [`Audit_Committee.py` Reference](#audit_committeepy-reference)
+- [Citation](#citation)
+- [License](#license)
+- [Contact](#contact)
+
+## Paper at a Glance
 
 This repository reproduces and extends the core finding of the paper: MoE routing does **not** primarily form domain-isolated specialists. Instead, models repeatedly rely on a small, stable, cross-domain expert coalition ("Standing Committee").
 
@@ -242,7 +274,7 @@ A CSV file with the following columns:
 |--------|---------|
 | `Layer` | Layer ID reported by the audit. |
 | `Committee` | Comma-separated list of selected expert IDs. |
-| `Size` | Number of experts in the committee (`|C|`). |
+| `Size` | Number of experts in the committee (`\|C\|`). |
 | `Avg_mu` | Average committee mean rank (`μ`, lower is better). |
 | `Avg_sigma_sq` | Average committee rank variance (`σ²`, lower is better). |
 | `Coverage` | Fraction of total layer contribution captured by the committee (ECI coverage). |
@@ -294,8 +326,7 @@ If you find this work useful, please cite:
 
 ## License
 
-This project is released under the **MIT License** — see [`LICENSE`](LICENSE) for details.
-<!-- If you prefer a different license (Apache-2.0, BSD-3, etc.), replace this section and add the corresponding LICENSE file. -->
+The code in this repository is released under the [MIT License](LICENSE). Datasets and models on Hugging Face keep their own licenses, stated on each card.
 
 ## Contact
 
@@ -303,3 +334,7 @@ For questions or issues, please open a [GitHub issue](https://github.com/The-Fin
 
 - Yan Wang — `wy2266336@gmail.com`
 - Zining Zhu — `zzhu41@stevens.edu`
+
+---
+
+<p align="center">Built by <a href="https://thefin.ai">The Fin AI</a> · <a href="https://huggingface.co/TheFinAI">Hugging Face</a> · <a href="https://github.com/The-FinAI">GitHub</a></p>
